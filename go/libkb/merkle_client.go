@@ -584,6 +584,18 @@ func (mc *MerkleClient) FetchRootFromServerBySeqno(m MetaContext, lowerBound key
 	return mc.fetchRootFromServer(m, root)
 }
 
+func (mc *MerkleClient) FetchRootFromServerByFreshness(m MetaContext, d time.Duration) (mr *MerkleRoot, err error) {
+	defer m.CVTrace(VLog0, "MerkleClient#FetchRootFromServerBySeqno", func() error { return err })()
+	root := mc.LastRoot()
+	now := m.G().Clock().Now()
+	if root != nil && now.Sub(root.fetched) >= d {
+		m.VLogf(VLog0, "fetched at=%v, and was current enough, so returning non-nil previously fetched root", root.fetched)
+		return root, nil
+	}
+	return mc.fetchRootFromServer(m, root)
+}
+
+
 func (mc *MerkleClient) FetchRootFromServer(m MetaContext, freshness time.Duration) (mr *MerkleRoot, err error) {
 	defer m.CVTrace(VLog0, "MerkleClient#FetchRootFromServer", func() error { return err })()
 	root := mc.LastRoot()
@@ -1695,6 +1707,13 @@ func (mr *MerkleRoot) ToInfo() chat1.MerkleRoot {
 	}
 }
 
+func (mr *MerkleRoot) ToMerkleRootV2() keybase1.MerkleRootV2 {
+	return keybase1.MerkleRootV2{
+		Seqno:    *mr.Seqno(),
+		HashMeta: mr.HashMeta(),
+	}
+}
+
 func (mc *MerkleClient) LastRootToSigJSON(m MetaContext) (ret *jsonw.Wrapper, err error) {
 	// Lazy-init, only when needed.
 	if err = mc.init(m); err == nil {
@@ -1720,6 +1739,22 @@ func (mc *MerkleClient) LastRootInfo(m MetaContext) (*chat1.MerkleRoot, error) {
 		return nil, nil
 	}
 	mi := mc.lastRoot.ToInfo()
+	return &mi, nil
+}
+
+// Can return (nil, nil) if no root is known.
+func (mc *MerkleClient) LastMerkleRootV2(m MetaContext) (*keybase1.MerkleRootV2, error) {
+	// Lazy-init, only when needed.
+	err := mc.init(m)
+	if err != nil {
+		return nil, err
+	}
+	mc.RLock()
+	defer mc.RUnlock()
+	if mc.lastRoot == nil {
+		return nil, nil
+	}
+	mi := mc.lastRoot.ToMerkleRootV2()
 	return &mi, nil
 }
 
