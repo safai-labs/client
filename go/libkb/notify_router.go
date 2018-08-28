@@ -30,7 +30,7 @@ type setObj struct {
 type NotifyListener interface {
 	Logout()
 	Login(username string)
-	ClientOutOfDate(to, uri, msg string)
+	ClientOutOfDate(to, uri, msg string, critical bool)
 	UserChanged(uid keybase1.UID)
 	TrackingChanged(uid keybase1.UID, username NormalizedUsername)
 	FSActivity(activity keybase1.FSNotification)
@@ -88,7 +88,7 @@ var _ NotifyListener = (*NoopNotifyListener)(nil)
 
 func (n *NoopNotifyListener) Logout()                                                       {}
 func (n *NoopNotifyListener) Login(username string)                                         {}
-func (n *NoopNotifyListener) ClientOutOfDate(to, uri, msg string)                           {}
+func (n *NoopNotifyListener) ClientOutOfDate(to, uri, msg string, critical bool)            {}
 func (n *NoopNotifyListener) UserChanged(uid keybase1.UID)                                  {}
 func (n *NoopNotifyListener) TrackingChanged(uid keybase1.UID, username NormalizedUsername) {}
 func (n *NoopNotifyListener) FSActivity(activity keybase1.FSNotification)                   {}
@@ -271,7 +271,7 @@ func (n *NotifyRouter) HandleLogin(u string) {
 // ClientOutOfDate is called whenever the API server tells us our client is out
 // of date. (This is done by adding special headers to every API response that
 // an out-of-date client makes.)
-func (n *NotifyRouter) HandleClientOutOfDate(upgradeTo, upgradeURI, upgradeMsg string) {
+func (n *NotifyRouter) HandleClientOutOfDate(upgradeTo, upgradeURI, upgradeMsg string, critical bool) {
 	if n == nil {
 		return
 	}
@@ -289,13 +289,14 @@ func (n *NotifyRouter) HandleClientOutOfDate(upgradeTo, upgradeURI, upgradeMsg s
 					UpgradeTo:  upgradeTo,
 					UpgradeURI: upgradeURI,
 					UpgradeMsg: upgradeMsg,
+					Critical:   critical,
 				})
 			}()
 		}
 		return true
 	})
 	if n.listener != nil {
-		n.listener.ClientOutOfDate(upgradeTo, upgradeURI, upgradeMsg)
+		n.listener.ClientOutOfDate(upgradeTo, upgradeURI, upgradeMsg, critical)
 	}
 	n.G().Log.Debug("- client-out-of-date notification sent")
 }

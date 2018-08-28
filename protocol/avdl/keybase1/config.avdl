@@ -138,6 +138,7 @@ protocol config {
     string upgradeTo;
     string upgradeURI;
     string customMessage;
+    boolean criticallyOutOfDate;
     long criticalClockSkew;
   }
 

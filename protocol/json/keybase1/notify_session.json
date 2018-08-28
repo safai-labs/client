@@ -30,6 +30,10 @@
         {
           "name": "upgradeMsg",
           "type": "string"
+        },
+        {
+          "name": "critical",
+          "type": "boolean"
         }
       ],
       "response": null

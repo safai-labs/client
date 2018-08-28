@@ -338,18 +338,20 @@ func (o ConfigValue) DeepCopy() ConfigValue {
 }
 
 type OutOfDateInfo struct {
-	UpgradeTo         string `codec:"upgradeTo" json:"upgradeTo"`
-	UpgradeURI        string `codec:"upgradeURI" json:"upgradeURI"`
-	CustomMessage     string `codec:"customMessage" json:"customMessage"`
-	CriticalClockSkew int64  `codec:"criticalClockSkew" json:"criticalClockSkew"`
+	UpgradeTo           string `codec:"upgradeTo" json:"upgradeTo"`
+	UpgradeURI          string `codec:"upgradeURI" json:"upgradeURI"`
+	CustomMessage       string `codec:"customMessage" json:"customMessage"`
+	CriticallyOutOfDate bool   `codec:"criticallyOutOfDate" json:"criticallyOutOfDate"`
+	CriticalClockSkew   int64  `codec:"criticalClockSkew" json:"criticalClockSkew"`
 }
 
 func (o OutOfDateInfo) DeepCopy() OutOfDateInfo {
 	return OutOfDateInfo{
-		UpgradeTo:         o.UpgradeTo,
-		UpgradeURI:        o.UpgradeURI,
-		CustomMessage:     o.CustomMessage,
-		CriticalClockSkew: o.CriticalClockSkew,
+		UpgradeTo:           o.UpgradeTo,
+		UpgradeURI:          o.UpgradeURI,
+		CustomMessage:       o.CustomMessage,
+		CriticallyOutOfDate: o.CriticallyOutOfDate,
+		CriticalClockSkew:   o.CriticalClockSkew,
 	}
 }
 

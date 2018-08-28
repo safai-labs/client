@@ -568,9 +568,14 @@ func (a *InternalAPIEngine) consumeHeaders(m MetaContext, resp *http.Response, n
 		g.outOfDateInfo.UpgradeTo = upgradeTo
 		g.outOfDateInfo.UpgradeURI = upgradeURI
 		g.outOfDateInfo.CustomMessage = customMessage
+		if resp.StatusCode == http.StatusBadRequest {
+			g.outOfDateInfo.CriticallyOutOfDate = true
+		}
 		if g.lastUpgradeWarning.IsZero() || now.Sub(*g.lastUpgradeWarning) > 3*time.Minute {
 			// Send the notification after we unlock
-			defer g.NotifyRouter.HandleClientOutOfDate(upgradeTo, upgradeURI, customMessage)
+			defer g.NotifyRouter.HandleClientOutOfDate(
+				upgradeTo, upgradeURI, customMessage,
+				g.outOfDateInfo.CriticallyOutOfDate)
 			*g.lastUpgradeWarning = now
 		}
 		g.oodiMu.Unlock()
@@ -584,6 +589,7 @@ func (a *InternalAPIEngine) consumeHeaders(m MetaContext, resp *http.Response, n
 		g.outOfDateInfo.UpgradeTo = ""
 		g.outOfDateInfo.UpgradeURI = ""
 		g.outOfDateInfo.CustomMessage = ""
+		g.outOfDateInfo.CriticallyOutOfDate = false
 		g.oodiMu.Unlock()
 	}
 	return
