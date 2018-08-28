@@ -12,6 +12,8 @@ export type AvatarSizes = {
   '40': string,
 }
 
+export type OutOfDate = 'out-of-date' | 'critically-out-of-date'
+
 export type _State = {
   appFocused: boolean,
   appFocusedCount: number,
@@ -46,5 +48,6 @@ export type _State = {
   uid: string,
   userActive: boolean,
   username: string,
+  outOfDate?: OutOfDate,
 }
 export type State = I.RecordOf<_State>

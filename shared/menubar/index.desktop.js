@@ -8,6 +8,7 @@ import ChatContainer from './chat-container.desktop'
 import {isDarwin} from '../constants/platform'
 import * as SafeElectron from '../util/safe-electron.desktop'
 import {throttle} from 'lodash-es'
+import OutOfDate from './out-of-date-container'
 
 export type Props = {
   isAsyncWriteHappening: boolean,
@@ -64,6 +65,7 @@ class MenubarRender extends React.Component<Props, State> {
 
     return (
       <Kb.Box style={styles.widgetContainer}>
+        <OutOfDate />
         {isDarwin && <style>{_realCSS}</style>}
         {isDarwin && <ArrowTick />}
         <Kb.Box style={Styles.collapseStyles([styles.topRow, {justifyContent: 'flex-end'}])}>
@@ -178,6 +180,7 @@ class MenubarRender extends React.Component<Props, State> {
 
     return (
       <Kb.Box style={styles.widgetContainer}>
+        <OutOfDate />
         {isDarwin && <style>{_realCSS}</style>}
         {isDarwin && <ArrowTick />}
         <Kb.Box style={styles.topRow}>

@@ -197,9 +197,10 @@ const setupEngineListeners = () => {
 
   getEngine().setIncomingActionCreators(
     'keybase.1.NotifySession.clientOutOfDate',
-    ({upgradeTo, upgradeURI, upgradeMsg}) => {
+    ({upgradeTo, upgradeURI, upgradeMsg, critical}) => {
       const body = upgradeMsg || `Please update to ${upgradeTo} by going to ${upgradeURI}`
       NotifyPopup('Client out of date!', {body}, 60 * 60)
+      return ConfigGen.createOutOfDate({critical})
     }
   )
 
@@ -226,6 +227,12 @@ const copyToClipboard = (_: any, action: ConfigGen.CopyToClipboardPayload) => {
   SafeElectron.getClipboard().writeText(action.payload.text)
 }
 
+const updateNow = () =>
+  new Promise(resolve => {
+    console.log('updateNow')
+    resolve()
+  })
+
 function* platformConfigSaga(): Saga.SagaGenerator<any, any> {
   yield Saga.actionToAction(ConfigGen.setOpenAtLogin, writeElectronSettingsOpenAtLogin)
   yield Saga.actionToAction(ConfigGen.setNotifySound, writeElectronSettingsNotifySound)
@@ -234,6 +241,7 @@ function* platformConfigSaga(): Saga.SagaGenerator<any, any> {
   yield Saga.actionToAction(ConfigGen.setupEngineListeners, setupReachabilityWatcher)
   yield Saga.actionToAction(ConfigGen.setupEngineListeners, setupEngineListeners)
   yield Saga.actionToAction(ConfigGen.copyToClipboard, copyToClipboard)
+  yield Saga.actionToPromise(ConfigGen.updateNow, updateNow)
   yield Saga.fork(initializeAppSettingsState)
 
   if (isWindows) {

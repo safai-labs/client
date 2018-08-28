@@ -155,6 +155,8 @@ export default function(state: Types.State = initialState, action: ConfigGen.Act
       return state.merge({justDeletedSelf: action.payload.deletedUsername})
     case ConfigGen.daemonHandshakeDone:
       return state.merge({daemonHandshakeState: 'done'})
+    case ConfigGen.outOfDate:
+      return state.set('outOfDate', action.payload.critical ? 'critically-out-of-date' : 'out-of-date')
     // Saga only actions
     case ConfigGen.loadTeamAvatars:
     case ConfigGen.loadAvatars:
@@ -168,6 +170,7 @@ export default function(state: Types.State = initialState, action: ConfigGen.Act
     case ConfigGen.installerRan:
     case ConfigGen.copyToClipboard:
     case ConfigGen._avatarQueue:
+    case ConfigGen.updateNow:
       return state
     default:
       /*::
