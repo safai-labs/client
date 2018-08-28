@@ -970,6 +970,7 @@ func makeState(arg fastLoadArg, s *keybase1.FastTeamData) *keybase1.FastTeamData
 			PerTeamKeySeedsVerified: make(map[keybase1.PerTeamKeyGeneration]keybase1.PerTeamKeySeed),
 			DownPointers:            make(map[keybase1.Seqno]keybase1.DownPointer),
 			LinkIDs:                 make(map[keybase1.Seqno]keybase1.LinkID),
+			MerkleInfo:              make(map[keybase1.Seqno]keybase1.MerkleRootV2),
 		},
 	}
 }
