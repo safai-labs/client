@@ -38,6 +38,21 @@ type Auditor struct {
 	lru      *lru.Cache
 }
 
+// NewAuditor makes a new auditor
+func NewAuditor() *Auditor {
+	ret := &Auditor{}
+	ret.newLRU()
+	return ret
+}
+
+// NewAuditorAndInstall makes a new Auditor and dangles it
+// off of the given GlobalContext.
+func NewAuditorAndInstall(g *libkb.GlobalContext) *Auditor {
+	a := NewAuditor()
+	g.SetTeamAuditor(a)
+	return a
+}
+
 // ProbabilisticMerkleTeamAudit runs an audit on the links of the given team chain (or subchain).
 // The security factor of the audit is a function of the platform type, and the amount of time
 // since the last audit. This method should use some sort of long-lived cache (via local DB) so that
@@ -231,7 +246,7 @@ func randSeqno(lo keybase1.Seqno, hi keybase1.Seqno) (keybase1.Seqno, error) {
 	if err != nil {
 		return keybase1.Seqno(0), err
 	}
-	return keybase1.Seqno(n.Int64()), nil
+	return keybase1.Seqno(n.Int64()) + lo, nil
 }
 
 type probeTuple struct {
@@ -253,6 +268,7 @@ func (a *Auditor) computeProbes(m libkb.MetaContext, teamID keybase1.TeamID, pro
 }
 
 func (a *Auditor) scheduleProbes(m libkb.MetaContext, probes map[keybase1.Seqno]keybase1.Probe, probeId int, left keybase1.Seqno, right keybase1.Seqno, probesInRange int, n int) (ret []probeTuple, err error) {
+	defer m.CTrace(fmt.Sprintf("Auditor#scheduleProblems(left=%d,right=%d)", left, right), func() error { return err })()
 	if probesInRange > n {
 		m.CDebugf("no more probes needed; did %d, wanted %d", probesInRange, n)
 		return nil, nil
@@ -275,6 +291,7 @@ func (a *Auditor) scheduleProbes(m libkb.MetaContext, probes map[keybase1.Seqno]
 	sort.SliceStable(ret, func(i, j int) bool {
 		return ret[i].merkle < ret[j].merkle
 	})
+	m.CDebugf("scheduled probes: %+v", ret)
 	return ret, nil
 }
 
